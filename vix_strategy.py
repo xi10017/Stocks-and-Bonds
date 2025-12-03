@@ -170,7 +170,7 @@ print(f"Current VIX 75th Percentile Threshold: {df['VIX_75pct'].iloc[-1]:.2f}")
 # =============================================================================
 # Plotting
 # =============================================================================
-fig, axes = plt.subplots(5, 1, figsize=(14, 18))
+fig, axes = plt.subplots(6, 1, figsize=(14, 21))
 
 # Plot 1: Cumulative Returns
 ax1 = axes[0]
@@ -258,8 +258,23 @@ ax5.set_ylabel("Rolling 12-Month Return (%)", fontsize=11)
 ax5.set_title("Trailing 12-Month Returns (Interval Performance)", fontsize=13, fontweight="bold")
 ax5.legend(loc="upper right", fontsize=10)
 ax5.grid(True, alpha=0.3)
-ax5.set_xlabel("Date", fontsize=11)
 ax5.set_xlim(df.index[0], df.index[-1])
+
+# Plot 6: Rolling Volatility (annualized)
+stock_rolling_vol = df["Stock_Return"].rolling(rolling_window_sharpe).std() * np.sqrt(252) * 100
+bond_rolling_vol = df["Bond_Return"].rolling(rolling_window_sharpe).std() * np.sqrt(252) * 100
+strategy_rolling_vol = df["Strategy_Return"].rolling(rolling_window_sharpe).std() * np.sqrt(252) * 100
+
+ax6 = axes[5]
+ax6.plot(df.index, stock_rolling_vol, label="S&P 500", color="#1f77b4", linewidth=1.2, alpha=0.8)
+ax6.plot(df.index, bond_rolling_vol, label="10Y Treasury", color="#2ca02c", linewidth=1.2, alpha=0.8)
+ax6.plot(df.index, strategy_rolling_vol, label="VIX Strategy", color="#d62728", linewidth=1.8)
+ax6.set_ylabel("Annualized Volatility (%)", fontsize=11)
+ax6.set_title("1-Year Rolling Volatility (Annualized Standard Deviation)", fontsize=13, fontweight="bold")
+ax6.legend(loc="upper right", fontsize=10)
+ax6.grid(True, alpha=0.3)
+ax6.set_xlabel("Date", fontsize=11)
+ax6.set_xlim(df.index[0], df.index[-1])
 
 plt.tight_layout()
 plt.savefig("strategy_analysis.png", dpi=150, bbox_inches="tight")
@@ -268,7 +283,158 @@ plt.show()
 print(f"\n✓ Chart saved to 'strategy_analysis.png'")
 
 # =============================================================================
-# Summary
+# Export CSVs
+# =============================================================================
+# Daily data CSV
+daily_data = pd.DataFrame({
+    "Date": df.index,
+    "Stock_Price": df["Stock"].values,
+    "Bond_Price": df["Bond"].values,
+    "VIX": df["VIX"].values,
+    "VIX_75pct_Threshold": df["VIX_75pct"].values,
+    "Signal_Hold_Bonds": df["High_Vol_Signal"].values,
+    "Stock_Return": df["Stock_Return"].values,
+    "Bond_Return": df["Bond_Return"].values,
+    "Strategy_Return": df["Strategy_Return"].values,
+    "Stock_Cumulative": df["Stock_Cumulative"].values,
+    "Bond_Cumulative": df["Bond_Cumulative"].values,
+    "Strategy_Cumulative": df["Strategy_Cumulative"].values,
+})
+daily_data.to_csv("daily_data.csv", index=False)
+print(f"✓ Daily data saved to 'daily_data.csv'")
+
+# Rolling metrics CSV
+rolling_metrics = pd.DataFrame({
+    "Date": df.index,
+    "Stock_Rolling_Vol_Pct": stock_rolling_vol,
+    "Bond_Rolling_Vol_Pct": bond_rolling_vol,
+    "Strategy_Rolling_Vol_Pct": strategy_rolling_vol,
+    "Stock_Rolling_Return_Pct": stock_rolling_return,
+    "Bond_Rolling_Return_Pct": bond_rolling_return,
+    "Strategy_Rolling_Return_Pct": strategy_rolling_return,
+    "Stock_Sharpe_Unadj": stock_rolling_sharpe_unadj,
+    "Bond_Sharpe_Unadj": bond_rolling_sharpe_unadj,
+    "Strategy_Sharpe_Unadj": strategy_rolling_sharpe_unadj,
+    "Stock_Sharpe_TreasuryAdj": stock_rolling_sharpe_adj,
+    "Bond_Sharpe_TreasuryAdj": bond_rolling_sharpe_adj,
+    "Strategy_Sharpe_TreasuryAdj": strategy_rolling_sharpe_adj,
+})
+rolling_metrics.to_csv("rolling_metrics.csv", index=False)
+print(f"✓ Rolling metrics saved to 'rolling_metrics.csv'")
+
+# Performance summary CSV
+def calculate_metrics_numeric(returns, name, risk_free_rate=0.02):
+    """Calculate performance metrics returning numeric values."""
+    total_return = (1 + returns).prod() - 1
+    years = len(returns) / 252
+    annual_return = (1 + total_return) ** (1 / years) - 1
+    annual_vol = returns.std() * np.sqrt(252)
+    sharpe = (annual_return - risk_free_rate) / annual_vol
+    cumulative = (1 + returns).cumprod()
+    rolling_max = cumulative.expanding().max()
+    drawdown = (cumulative - rolling_max) / rolling_max
+    max_drawdown = drawdown.min()
+    
+    return {
+        "Strategy": name,
+        "Total_Return_Pct": round(total_return * 100, 2),
+        "Annual_Return_Pct": round(annual_return * 100, 2),
+        "Annual_Volatility_Pct": round(annual_vol * 100, 2),
+        "Sharpe_Ratio": round(sharpe, 3),
+        "Max_Drawdown_Pct": round(max_drawdown * 100, 2)
+    }
+
+performance_summary = pd.DataFrame([
+    calculate_metrics_numeric(df["Stock_Return"], "Buy_Hold_SP500"),
+    calculate_metrics_numeric(df["Bond_Return"], "Buy_Hold_10Y_Treasury"),
+    calculate_metrics_numeric(df["Strategy_Return"], "VIX_Switching_Strategy")
+])
+performance_summary.to_csv("performance_summary.csv", index=False)
+print(f"✓ Performance summary saved to 'performance_summary.csv'")
+
+# =============================================================================
+# Summary Text File
+# =============================================================================
+summary_text = f"""
+================================================================================
+VIX-BASED STOCK/BOND SWITCHING STRATEGY - SUMMARY REPORT
+================================================================================
+Generated: {datetime.today().strftime("%Y-%m-%d %H:%M:%S")}
+
+STRATEGY DESCRIPTION
+--------------------
+This strategy switches between stocks and bonds based on market volatility:
+  - When VIX > 75th percentile (rolling 1-year window) → Hold Bonds (IEF)
+  - When VIX ≤ 75th percentile → Hold Stocks (VOO)
+  - Signal uses previous day's data to avoid look-ahead bias
+  - No transaction costs assumed
+
+INSTRUMENTS
+-----------
+  Stocks: VOO (Vanguard S&P 500 ETF)
+  Bonds:  IEF (iShares 7-10 Year Treasury Bond ETF)
+  VIX:    ^VIX (CBOE Volatility Index)
+
+DATA PERIOD
+-----------
+  Start Date: {df.index[0].strftime("%Y-%m-%d")}
+  End Date:   {df.index[-1].strftime("%Y-%m-%d")}
+  Trading Days: {len(df)}
+
+PERFORMANCE COMPARISON
+----------------------
+                              S&P 500      10Y Treasury    VIX Strategy
+  Total Return:               {performance_summary.iloc[0]['Total_Return_Pct']:>8.2f}%      {performance_summary.iloc[1]['Total_Return_Pct']:>8.2f}%      {performance_summary.iloc[2]['Total_Return_Pct']:>8.2f}%
+  Annual Return:              {performance_summary.iloc[0]['Annual_Return_Pct']:>8.2f}%      {performance_summary.iloc[1]['Annual_Return_Pct']:>8.2f}%      {performance_summary.iloc[2]['Annual_Return_Pct']:>8.2f}%
+  Annual Volatility:          {performance_summary.iloc[0]['Annual_Volatility_Pct']:>8.2f}%      {performance_summary.iloc[1]['Annual_Volatility_Pct']:>8.2f}%      {performance_summary.iloc[2]['Annual_Volatility_Pct']:>8.2f}%
+  Sharpe Ratio:               {performance_summary.iloc[0]['Sharpe_Ratio']:>8.3f}       {performance_summary.iloc[1]['Sharpe_Ratio']:>8.3f}       {performance_summary.iloc[2]['Sharpe_Ratio']:>8.3f}
+  Max Drawdown:               {performance_summary.iloc[0]['Max_Drawdown_Pct']:>8.2f}%      {performance_summary.iloc[1]['Max_Drawdown_Pct']:>8.2f}%      {performance_summary.iloc[2]['Max_Drawdown_Pct']:>8.2f}%
+
+SIGNAL STATISTICS
+-----------------
+  Days holding Bonds (VIX > 75th pct): {int(bond_days)} ({bond_days/len(df):.1%})
+  Days holding Stocks (VIX ≤ 75th pct): {int(stock_days)} ({stock_days/len(df):.1%})
+
+VIX STATISTICS
+--------------
+  Mean:   {df['VIX'].mean():.2f}
+  Median: {df['VIX'].median():.2f}
+  Min:    {df['VIX'].min():.2f}
+  Max:    {df['VIX'].max():.2f}
+  Current 75th Percentile Threshold: {df['VIX_75pct'].iloc[-1]:.2f}
+
+HYPOTHESIS EVALUATION
+---------------------
+  ✓ Lower returns than stocks:        YES ({performance_summary.iloc[2]['Annual_Return_Pct']:.1f}% vs {performance_summary.iloc[0]['Annual_Return_Pct']:.1f}%)
+  ✓ Significantly lower volatility:   YES ({performance_summary.iloc[2]['Annual_Volatility_Pct']:.1f}% vs {performance_summary.iloc[0]['Annual_Volatility_Pct']:.1f}% = {(1 - performance_summary.iloc[2]['Annual_Volatility_Pct']/performance_summary.iloc[0]['Annual_Volatility_Pct'])*100:.0f}% reduction)
+  ✗ Better Sharpe ratio:              NO  ({performance_summary.iloc[2]['Sharpe_Ratio']:.3f} vs {performance_summary.iloc[0]['Sharpe_Ratio']:.3f})
+  ✓ Lower max drawdown:               YES ({performance_summary.iloc[2]['Max_Drawdown_Pct']:.1f}% vs {performance_summary.iloc[0]['Max_Drawdown_Pct']:.1f}%)
+
+CONCLUSION
+----------
+The VIX switching strategy successfully reduces volatility by ~{(1 - performance_summary.iloc[2]['Annual_Volatility_Pct']/performance_summary.iloc[0]['Annual_Volatility_Pct'])*100:.0f}% and provides 
+downside protection with a smaller maximum drawdown. However, in this strong bull 
+market period (2011-2025), the return sacrifice was too large to improve the 
+risk-adjusted return (Sharpe ratio). The strategy would likely perform better 
+in sideways or bear markets.
+
+FILES GENERATED
+---------------
+  - strategy_analysis.png   : 6-panel visualization
+  - daily_data.csv          : Daily prices, signals, and returns
+  - rolling_metrics.csv     : Rolling volatility, returns, and Sharpe ratios
+  - performance_summary.csv : Summary performance metrics
+  - summary.txt             : This summary report
+
+================================================================================
+"""
+
+with open("summary.txt", "w") as f:
+    f.write(summary_text)
+print(f"✓ Summary report saved to 'summary.txt'")
+
+# =============================================================================
+# Print Summary
 # =============================================================================
 print("\n" + "=" * 60)
 print("STRATEGY SUMMARY")

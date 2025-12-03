@@ -1,0 +1,72 @@
+
+================================================================================
+VIX-BASED STOCK/BOND SWITCHING STRATEGY - SUMMARY REPORT
+================================================================================
+Generated: 2025-12-02 21:19:07
+
+STRATEGY DESCRIPTION
+--------------------
+This strategy switches between stocks and bonds based on market volatility:
+  - When VIX > 75th percentile (rolling 1-year window) → Hold Bonds (IEF)
+  - When VIX ≤ 75th percentile → Hold Stocks (VOO)
+  - Signal uses previous day's data to avoid look-ahead bias
+  - No transaction costs assumed
+
+INSTRUMENTS
+-----------
+  Stocks: VOO (Vanguard S&P 500 ETF)
+  Bonds:  IEF (iShares 7-10 Year Treasury Bond ETF)
+  VIX:    ^VIX (CBOE Volatility Index)
+
+DATA PERIOD
+-----------
+  Start Date: 2011-09-08
+  End Date:   2025-12-01
+  Trading Days: 3578
+
+PERFORMANCE COMPARISON
+----------------------
+                              S&P 500      10Y Treasury    VIX Strategy
+  Total Return:                 633.88%         25.22%        277.03%
+  Annual Return:                 15.07%          1.60%          9.80%
+  Annual Volatility:             17.06%          6.49%         11.41%
+  Sharpe Ratio:                  0.766         -0.062          0.684
+  Max Drawdown:                 -33.99%        -23.92%        -27.76%
+
+SIGNAL STATISTICS
+-----------------
+  Days holding Bonds (VIX > 75th pct): 820 (22.9%)
+  Days holding Stocks (VIX ≤ 75th pct): 2758 (77.1%)
+
+VIX STATISTICS
+--------------
+  Mean:   18.02
+  Median: 16.20
+  Min:    9.14
+  Max:    82.69
+  Current 75th Percentile Threshold: 20.17
+
+HYPOTHESIS EVALUATION
+---------------------
+  ✓ Lower returns than stocks:        YES (9.8% vs 15.1%)
+  ✓ Significantly lower volatility:   YES (11.4% vs 17.1% = 33% reduction)
+  ✗ Better Sharpe ratio:              NO  (0.684 vs 0.766)
+  ✓ Lower max drawdown:               YES (-27.8% vs -34.0%)
+
+CONCLUSION
+----------
+The VIX switching strategy successfully reduces volatility by ~33% and provides 
+downside protection with a smaller maximum drawdown. However, in this strong bull 
+market period (2011-2025), the return sacrifice was too large to improve the 
+risk-adjusted return (Sharpe ratio). The strategy would likely perform better 
+in sideways or bear markets.
+
+FILES GENERATED
+---------------
+  - strategy_analysis.png   : 6-panel visualization
+  - daily_data.csv          : Daily prices, signals, and returns
+  - rolling_metrics.csv     : Rolling volatility, returns, and Sharpe ratios
+  - performance_summary.csv : Summary performance metrics
+  - summary.txt             : This summary report
+
+================================================================================
