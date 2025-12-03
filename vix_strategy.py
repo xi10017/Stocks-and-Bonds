@@ -170,7 +170,7 @@ print(f"Current VIX 75th Percentile Threshold: {df['VIX_75pct'].iloc[-1]:.2f}")
 # =============================================================================
 # Plotting
 # =============================================================================
-fig, axes = plt.subplots(6, 1, figsize=(14, 21))
+fig, axes = plt.subplots(7, 1, figsize=(14, 24))
 
 # Plot 1: Cumulative Returns
 ax1 = axes[0]
@@ -273,8 +273,30 @@ ax6.set_ylabel("Annualized Volatility (%)", fontsize=11)
 ax6.set_title("1-Year Rolling Volatility (Annualized Standard Deviation)", fontsize=13, fontweight="bold")
 ax6.legend(loc="upper right", fontsize=10)
 ax6.grid(True, alpha=0.3)
-ax6.set_xlabel("Date", fontsize=11)
 ax6.set_xlim(df.index[0], df.index[-1])
+
+# Plot 7: Drawdown (lines only, no shading)
+def calculate_drawdown(returns):
+    cumulative = (1 + returns).cumprod()
+    rolling_max = cumulative.expanding().max()
+    drawdown = (cumulative - rolling_max) / rolling_max * 100  # Convert to percentage
+    return drawdown
+
+stock_drawdown = calculate_drawdown(df["Stock_Return"])
+bond_drawdown = calculate_drawdown(df["Bond_Return"])
+strategy_drawdown = calculate_drawdown(df["Strategy_Return"])
+
+ax7 = axes[6]
+ax7.plot(df.index, stock_drawdown, label="S&P 500", color="#1f77b4", linewidth=1.2, alpha=0.8)
+ax7.plot(df.index, bond_drawdown, label="10Y Treasury", color="#2ca02c", linewidth=1.2, alpha=0.8)
+ax7.plot(df.index, strategy_drawdown, label="VIX Strategy", color="#d62728", linewidth=1.8)
+ax7.axhline(y=0, color="black", linewidth=0.5, linestyle="-")
+ax7.set_ylabel("Drawdown (%)", fontsize=11)
+ax7.set_title("Drawdown from Peak (Maximum Loss from High)", fontsize=13, fontweight="bold")
+ax7.legend(loc="lower right", fontsize=10)
+ax7.grid(True, alpha=0.3)
+ax7.set_xlabel("Date", fontsize=11)
+ax7.set_xlim(df.index[0], df.index[-1])
 
 plt.tight_layout()
 plt.savefig("strategy_analysis.png", dpi=150, bbox_inches="tight")
@@ -420,7 +442,14 @@ in sideways or bear markets.
 
 FILES GENERATED
 ---------------
-  - strategy_analysis.png   : 6-panel visualization
+  - strategy_analysis.png   : 7-panel visualization
+      1. Cumulative Returns
+      2. VIX Index & 75th Percentile Threshold
+      3. Rolling Sharpe Ratio (Unadjusted)
+      4. Rolling Sharpe Ratio (Treasury Adjusted)
+      5. Trailing 12-Month Returns
+      6. Rolling Volatility
+      7. Drawdown from Peak
   - daily_data.csv          : Daily prices, signals, and returns
   - rolling_metrics.csv     : Rolling volatility, returns, and Sharpe ratios
   - performance_summary.csv : Summary performance metrics

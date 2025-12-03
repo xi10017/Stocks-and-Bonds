@@ -2,7 +2,7 @@
 ================================================================================
 VIX-BASED STOCK/BOND SWITCHING STRATEGY - SUMMARY REPORT
 ================================================================================
-Generated: 2025-12-02 21:19:07
+Generated: 2025-12-02 21:32:49
 
 STRATEGY DESCRIPTION
 --------------------
@@ -27,7 +27,7 @@ DATA PERIOD
 PERFORMANCE COMPARISON
 ----------------------
                               S&P 500      10Y Treasury    VIX Strategy
-  Total Return:                 633.88%         25.22%        277.03%
+  Total Return:                 633.88%         25.22%        277.02%
   Annual Return:                 15.07%          1.60%          9.80%
   Annual Volatility:             17.06%          6.49%         11.41%
   Sharpe Ratio:                  0.766         -0.062          0.684
@@ -63,7 +63,14 @@ in sideways or bear markets.
 
 FILES GENERATED
 ---------------
-  - strategy_analysis.png   : 6-panel visualization
+  - strategy_analysis.png   : 7-panel visualization
+      1. Cumulative Returns
+      2. VIX Index & 75th Percentile Threshold
+      3. Rolling Sharpe Ratio (Unadjusted)
+      4. Rolling Sharpe Ratio (Treasury Adjusted)
+      5. Trailing 12-Month Returns
+      6. Rolling Volatility
+      7. Drawdown from Peak
   - daily_data.csv          : Daily prices, signals, and returns
   - rolling_metrics.csv     : Rolling volatility, returns, and Sharpe ratios
   - performance_summary.csv : Summary performance metrics

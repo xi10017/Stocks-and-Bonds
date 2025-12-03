@@ -1,4 +1,4 @@
 Strategy,Total_Return_Pct,Annual_Return_Pct,Annual_Volatility_Pct,Sharpe_Ratio,Max_Drawdown_Pct
 Buy_Hold_SP500,633.88,15.07,17.06,0.766,-33.99
 Buy_Hold_10Y_Treasury,25.22,1.6,6.49,-0.062,-23.92
-VIX_Switching_Strategy,277.03,9.8,11.41,0.684,-27.76
+VIX_Switching_Strategy,277.02,9.8,11.41,0.684,-27.76
