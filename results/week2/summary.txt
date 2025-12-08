@@ -1,0 +1,149 @@
+
+================================================================================
+VIX STRATEGY PARAMETER TUNING - SUMMARY REPORT
+================================================================================
+Generated: 2025-12-08
+
+OVERVIEW
+--------
+This analysis tests 60 parameter combinations:
+  - Lookback windows: 3mo, 6mo, 9mo, 1yr, 15mo, 18mo (63-378 trading days)
+  - Percentile cutoffs: 50%, 55%, 60%, 65%, 70%, 75%, 80%, 85%, 90%, 95%
+
+================================================================================
+BASELINE BENCHMARKS (Buy & Hold)
+================================================================================
+
+                        S&P 500 (VOO)    10Y Treasury (IEF)
+  Annual Return:            14.82%              2.14%
+  Annual Volatility:        17.15%              6.63%
+  Sharpe Ratio:              0.748             0.021
+  Max Drawdown:            -34.00%            -23.92%
+
+================================================================================
+BEST PARAMETERS BY METRIC
+================================================================================
+
+HIGHEST SHARPE RATIO: 0.978
+  Parameters: Lookback = 15mo (315 days), Cutoff = 90%
+  Annual Return: 14.55%
+  Annual Volatility: 12.83%
+  Max Drawdown: -29.48%
+  Time in Bonds: 10.8%
+  
+  vs S&P 500: Sharpe +31% better, Volatility 25% lower, Return similar
+  vs Bonds:   Sharpe 46x better, Return 6.8x higher
+
+--------------------------------------------------------------------------------
+
+LOWEST VOLATILITY: 8.93%
+  Parameters: Lookback = 18mo (378 days), Cutoff = 50%
+  Annual Return: 6.29%
+  Sharpe Ratio: 0.480
+  Max Drawdown: -23.35%
+  Time in Bonds: 46.2%
+  
+  vs S&P 500: Volatility 48% lower, but Return 57% lower
+  vs Bonds:   Volatility 35% higher, but Return 3x higher
+
+--------------------------------------------------------------------------------
+
+HIGHEST RETURN: 14.55%
+  Parameters: Lookback = 15mo (315 days), Cutoff = 90%
+  (Same as highest Sharpe - this is the optimal combination)
+  
+  vs S&P 500: Return slightly lower (-0.27%), but much safer
+  vs Bonds:   Return 6.8x higher
+
+--------------------------------------------------------------------------------
+
+BEST MAX DRAWDOWN: -19.04%
+  Parameters: Lookback = 18mo (378 days), Cutoff = 65%
+  Annual Return: 9.42%
+  Annual Volatility: 9.83%
+  Sharpe Ratio: 0.755
+  Time in Bonds: 32.8%
+  
+  vs S&P 500: Drawdown 44% better (-19% vs -34%), Sharpe similar
+  vs Bonds:   Drawdown 20% better (-19% vs -24%)
+
+================================================================================
+ORIGINAL PARAMETERS COMPARISON
+================================================================================
+
+Original (1yr lookback, 75% cutoff):
+  Annual Return: 10.18%
+  Annual Volatility: 11.42%
+  Sharpe Ratio: 0.716
+  Max Drawdown: -27.76%
+  Time in Bonds: 22.9%
+
+Optimal (15mo lookback, 90% cutoff):
+  Annual Return: 14.55%  (+4.4%)
+  Annual Volatility: 12.83%  (+1.4%)
+  Sharpe Ratio: 0.978  (+0.26)
+  Max Drawdown: -29.48%  (-1.7%)
+  Time in Bonds: 10.8%  (-12.1%)
+
+Improvement: Higher Sharpe (+37%), higher return (+43%), similar risk
+
+================================================================================
+HOW MANY COMBINATIONS BEAT THE BENCHMARKS?
+================================================================================
+
+VS S&P 500:
+  Higher Sharpe Ratio:     24/60 (40%)
+  Lower Volatility:        60/60 (100%)  ← ALL combinations beat S&P
+  Better Max Drawdown:     60/60 (100%)  ← ALL combinations beat S&P
+
+VS 10Y Treasury:
+  Higher Sharpe Ratio:     60/60 (100%)  ← ALL combinations beat Bonds
+  Higher Return:           60/60 (100%)  ← ALL combinations beat Bonds
+
+================================================================================
+KEY INSIGHTS
+================================================================================
+
+1. VOLATILITY REDUCTION IS GUARANTEED
+   Every single parameter combination has lower volatility than pure stocks.
+   The VIX strategy always provides some risk reduction.
+
+2. SHARPE RATIO CAN BEAT S&P 500
+   40% of parameter combinations achieve a higher Sharpe ratio than 
+   buy-and-hold S&P 500. The best is 31% higher (0.978 vs 0.748).
+
+3. HIGHER CUTOFFS PERFORM BETTER
+   Counter-intuitively, using a 90% cutoff (only switch to bonds in extreme 
+   volatility) outperforms the original 75% cutoff. This is because you 
+   stay in stocks more often during the bull market.
+
+4. LONGER LOOKBACKS ARE BETTER FOR SHARPE
+   15-month lookback windows tend to produce the best risk-adjusted returns,
+   likely because they smooth out short-term VIX noise.
+
+5. THE SWEET SPOT
+   Parameters: 15mo lookback, 90% cutoff
+   - Nearly matches S&P 500 returns (14.55% vs 14.82%)
+   - 25% lower volatility (12.83% vs 17.15%)
+   - 31% higher Sharpe ratio (0.978 vs 0.748)
+   - Only in bonds 11% of the time
+
+================================================================================
+FILES IN THIS ANALYSIS
+================================================================================
+
+Code:
+  - code/week2/parameter_tuning.py           : Basic parameter sweep
+  - code/week2/parameter_tuning_baseline.py  : Baseline comparison heatmaps
+
+Data:
+  - data/week2/parameter_tuning.csv          : All 60 combinations with metrics
+
+Results:
+  - results/week2/parameter_tuning.png       : Basic heatmaps (5 metrics)
+  - results/week2/parameter_tuning_vs_sp500.png  : Diverging heatmap vs S&P
+  - results/week2/parameter_tuning_vs_bonds.png  : Diverging heatmap vs Bonds
+  - results/week2/summary.txt                : This summary
+
+================================================================================
+

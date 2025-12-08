@@ -24,7 +24,7 @@ BOND_TICKER = "IEF"       # iShares 7-10 Year Treasury Bond ETF
 VIX_TICKER = "^VIX"       # CBOE Volatility Index
 
 ROLLING_WINDOW = 252      # Trading days in a year
-VIX_PERCENTILE = 0.75     # 75th percentile threshold (3rd quartile)
+VIX_PERCENTILE = 0.90     # 75th percentile threshold (3rd quartile)
 
 START_DATE = "2010-01-01"
 END_DATE = datetime.today().strftime("%Y-%m-%d")
