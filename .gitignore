@@ -22,6 +22,18 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
+# Data files (large CSVs - optional, uncomment if you don't want to commit data)
+# data/**/*.csv
+
+# Results (optional - uncomment if you don't want to commit results)
+# results/**/*.png
+# results/**/*.csv
+# results/**/*.txt
+
+
+
+
+
 
 
 
