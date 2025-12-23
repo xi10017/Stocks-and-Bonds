@@ -104,38 +104,29 @@ df["Strategy_Cumulative"] = (1 + df["Strategy_Return"]).cumprod()
 # =============================================================================
 # Performance Metrics
 # =============================================================================
-def calculate_metrics(returns, name, risk_free_rate=0.02):
-    """Calculate performance metrics for a return series."""
-    # Annualized return
+def calculate_metrics_display(returns, name, risk_free_rate=0.02):
+    """Calculate performance metrics for display (formatted strings)."""
+    import sys
+    import os
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    from utils import calculate_metrics
+    
+    metrics = calculate_metrics(returns, risk_free_rate)
     total_return = (1 + returns).prod() - 1
-    years = len(returns) / 252
-    annual_return = (1 + total_return) ** (1 / years) - 1
-    
-    # Annualized volatility
-    annual_vol = returns.std() * np.sqrt(252)
-    
-    # Sharpe ratio
-    sharpe = (annual_return - risk_free_rate) / annual_vol
-    
-    # Maximum drawdown
-    cumulative = (1 + returns).cumprod()
-    rolling_max = cumulative.expanding().max()
-    drawdown = (cumulative - rolling_max) / rolling_max
-    max_drawdown = drawdown.min()
     
     return {
         "Name": name,
         "Total Return": f"{total_return:.2%}",
-        "Annual Return": f"{annual_return:.2%}",
-        "Annual Volatility": f"{annual_vol:.2%}",
-        "Sharpe Ratio": f"{sharpe:.3f}",
-        "Max Drawdown": f"{max_drawdown:.2%}"
+        "Annual Return": f"{metrics['annual_return']:.2%}",
+        "Annual Volatility": f"{metrics['annual_vol']:.2%}",
+        "Sharpe Ratio": f"{metrics['sharpe']:.3f}",
+        "Max Drawdown": f"{metrics['max_drawdown']:.2%}"
     }
 
 # Calculate metrics for all strategies
-stock_metrics = calculate_metrics(df["Stock_Return"], "Buy & Hold S&P 500 (VOO)")
-bond_metrics = calculate_metrics(df["Bond_Return"], "Buy & Hold 10Y Treasury (IEF)")
-strategy_metrics = calculate_metrics(df["Strategy_Return"], "VIX Switching Strategy")
+stock_metrics = calculate_metrics_display(df["Stock_Return"], "Buy & Hold S&P 500 (VOO)")
+bond_metrics = calculate_metrics_display(df["Bond_Return"], "Buy & Hold 10Y Treasury (IEF)")
+strategy_metrics = calculate_metrics_display(df["Strategy_Return"], "VIX Switching Strategy")
 
 # =============================================================================
 # Display Results

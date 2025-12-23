@@ -1,0 +1,4 @@
+Strategy,Original_Sharpe,CI_Lower_95,CI_Upper_95,CI_Width
+S&P 500 (SPY),0.4383,0.0567,0.8006,0.7439
+10Y Treasury,-0.0497,-0.4477,0.3892,0.8369
+VIX Strategy,1.9787,1.6161,2.342,0.7258
