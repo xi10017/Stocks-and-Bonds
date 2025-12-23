@@ -1,0 +1,21 @@
+T_Test:
+  statistic: 5.028472
+  pvalue: 0.000049
+  significant: True
+  interpretation: Mean annual returns are significantly different
+
+F_Test:
+  statistic: 0.648580
+  pvalue: 0.317263
+  strategy_variance: 0.016191
+  benchmark_variance: 0.024964
+  variance_ratio: 0.648580
+  significant: False
+  interpretation: Strategy variance is not significantly lower than benchmark
+
+Correlation:
+  correlation: 0.468553
+  pvalue: 0.024127
+  significant: True
+  interpretation: Moderate positive correlation
+
