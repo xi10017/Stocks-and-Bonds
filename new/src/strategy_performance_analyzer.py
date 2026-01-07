@@ -8,7 +8,7 @@ Analyzes a trading strategy's performance with comprehensive metrics including:
 - Regime attribution (Bull/Bear Beta)
 - Professional visualizations
 
-Author: Senior Quantitative Developer
+Author: Xi Chen
 Date: 2025-12-18
 """
 
@@ -986,6 +986,7 @@ class StrategyPerformanceAnalyzer:
                             save_path: str = None) -> None:
         """
         Create heatmap: Year × Metric (Return, Sharpe, Volatility).
+        Uses separate color scales for each metric since they have different ranges.
         
         Parameters:
         -----------
@@ -998,17 +999,55 @@ class StrategyPerformanceAnalyzer:
         heatmap_data = annual_perf[['Total_Return', 'Sharpe_Ratio', 'Volatility']].copy()
         heatmap_data.columns = ['Return', 'Sharpe', 'Volatility']
         
-        # Normalize for better visualization (optional - can show raw values)
-        fig, ax = plt.subplots(figsize=(10, max(6, len(heatmap_data) * 0.3)))
+        # Calculate figure size: wider for more years, taller for better cell height
+        num_years = len(heatmap_data)
+        num_metrics = 3
+        fig_width = max(18, num_years * 0.6)  # At least 0.6 units per year (slightly wider)
+        fig_height = max(6, num_metrics * 1.2)  # At least 1.2 units per metric row
         
-        sns.heatmap(heatmap_data.T, annot=True, fmt='.3f', cmap='RdYlGn',
-                   center=0, ax=ax, cbar_kws={'label': 'Value'},
-                   linewidths=0.5, linecolor='gray')
+        fig, axes = plt.subplots(3, 1, figsize=(fig_width, fig_height), sharex=True)
         
-        ax.set_title('Annual Performance Heatmap: Year × Metric',
-                    fontsize=13, fontweight='bold')
-        ax.set_xlabel('Year', fontsize=11)
-        ax.set_ylabel('Metric', fontsize=11)
+        # Define color scales and centers for each metric
+        metrics_config = [
+            ('Return', 'RdYlGn', 0, 'Return (%)'),
+            ('Sharpe', 'RdYlGn', 0, 'Sharpe Ratio'),
+            ('Volatility', 'RdYlGn_r', None, 'Volatility (%)')  # Reversed: lower is better
+        ]
+        
+        for idx, (metric, cmap, center, label) in enumerate(metrics_config):
+            ax = axes[idx]
+            metric_data = heatmap_data[[metric]].T
+            
+            # Set vmin/vmax based on data range for better color distribution
+            vmin = metric_data.min().min()
+            vmax = metric_data.max().max()
+            
+            # Add some padding to the range
+            data_range = vmax - vmin
+            vmin = vmin - 0.1 * data_range
+            vmax = vmax + 0.1 * data_range
+            
+            # For volatility (reversed scale), we want lower to be better (greener)
+            # For return and Sharpe, higher is better (greener)
+            if center is not None:
+                sns.heatmap(metric_data, annot=True, fmt='.3f', cmap=cmap,
+                           center=center, ax=ax, cbar_kws={'label': label},
+                           linewidths=0.5, linecolor='gray',
+                           annot_kws={'size': 9}, vmin=vmin, vmax=vmax)
+            else:
+                # For volatility, use reversed scale without center
+                sns.heatmap(metric_data, annot=True, fmt='.3f', cmap=cmap,
+                           ax=ax, cbar_kws={'label': label},
+                           linewidths=0.5, linecolor='gray',
+                           annot_kws={'size': 9}, vmin=vmin, vmax=vmax)
+            
+            ax.set_ylabel(metric, fontsize=11, fontweight='bold')
+            ax.set_xticklabels([str(int(x)) for x in heatmap_data.index], rotation=0)
+            ax.set_yticklabels([metric], rotation=0)
+        
+        axes[0].set_title('Annual Performance Heatmap: Year × Metric\n(Each metric uses its own color scale)', 
+                         fontsize=13, fontweight='bold')
+        axes[-1].set_xlabel('Year', fontsize=11)
         
         plt.tight_layout()
         if save_path:
