@@ -1,0 +1,4 @@
+Comparison,SAMoVAR Wins,AR3 Wins,Naive Wins,Ties,Total Days
+SAMoVAR vs AR3,855.0,1092.0,,0.0,1947
+SAMoVAR vs Naive,786.0,,247.0,,1947
+AR3 vs Naive,,914.0,1033.0,,1947

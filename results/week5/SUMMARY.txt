@@ -1,0 +1,59 @@
+VIX PREDICTION MODEL COMPARISON - QUICK SUMMARY
+================================================
+
+Date: January 19, 2026
+Analysis Period: 2005-2019 (3,597 trading days)
+
+MODELS COMPARED:
+1. Naive Baseline (yesterday's VIX)
+2. AR3 (autoregressive model with 3 lags)
+3. SAMoVAR (Structural-Aligned Mixture of VAR)
+
+OVERALL RESULTS:
+---------------
+Ranking by MAE:
+  1. Naive:  1.045 (BEST)
+  2. AR3:    1.090
+  3. SAMoVAR: 1.309 (WORST)
+
+Ranking by Win Rate (days won):
+  1. AR3:    36.1% (1,297 days)
+  2. Naive:  33.8% (1,214 days)
+  3. SAMoVAR: 30.2% (1,086 days)
+
+KEY FINDINGS:
+-------------
+✓ Naive baseline achieves lowest overall error (MAE: 1.045)
+✓ AR3 wins on most individual days (36.1%)
+✓ SAMoVAR underperforms both baselines
+✓ SAMoVAR struggles most during high volatility periods
+✓ Primary issue: Overfitting (test loss 2-3x validation loss)
+
+PAIRWISE COMPARISONS:
+--------------------
+SAMoVAR vs AR3:      AR3 wins 54.5% of days
+SAMoVAR vs Naive:    Naive wins 58.0% of days
+AR3 vs Naive:        Naive wins 54.1% of days
+
+PERFORMANCE BY VIX LEVEL:
+-------------------------
+Low VIX (<15):       SAMoVAR MAE: 0.63, AR3 MAE: 0.60
+Medium VIX (15-20):  SAMoVAR MAE: 1.14, AR3 MAE: 0.98
+High VIX (20-30):    SAMoVAR MAE: 1.93, AR3 MAE: 1.42
+Very High (>30):     SAMoVAR MAE: 3.88, AR3 MAE: 3.22
+
+ROOT CAUSE OF SAMoVAR UNDERPERFORMANCE:
+----------------------------------------
+1. Overfitting: Model too complex for available data
+2. Small training window: 3-year rolling window insufficient
+3. Architecture mismatch: Transformer overkill for univariate task
+4. Hyperparameters: Dropout too low, learning rate potentially too high
+
+FILES INCLUDED:
+--------------
+- visualizations/prediction_models/: Model comparison charts (13 files)
+  * AR3 vs SAMoVAR comparisons (7 files)
+  * Three-way comparisons: Naive, AR3, SAMoVAR (6 files)
+- visualizations/strategy_metrics/: VIX strategy performance bar charts (1 file)
+  * Annual metrics bar charts for "yesterday's VIX" strategy
+- tables/: CSV files with detailed metrics (4 files)
